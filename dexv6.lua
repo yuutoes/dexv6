@@ -1,123 +1,122 @@
--- Thanks to babyhamsta, Chillz.
+-- Credits to babyhamsta, and Chillz.
 
 if not getgenv().DexBypassLoaded then
-	getgenv().DexBypassLoaded = true
-	
-	local cloneref = cloneref or function(o) return o end
-	local RunService = cloneref(game:GetService("RunService"))
-	local Stats = cloneref(game:GetService("Stats"))
-	local ContentProvider = cloneref(game:GetService("ContentProvider"))
-	local CoreGui = cloneref(game:GetService("CoreGui"))
+    getgenv().DexBypassLoaded = true
 
-	task.spawn(function()
-		repeat task.wait() until game:IsLoaded()
-		local Amplitude = 200
-		local RandomValue = {-200, 200}
-		local RandomTime = {.1, 1}
-		local floor = math.floor
-		local cos = math.cos
-		local acos = math.acos
-		local pi = math.pi
-		local Maxima = 0
+    local cloneref = cloneref or function(o) return o end
+    local RunService = cloneref(game:GetService("RunService"))
+    local Stats = cloneref(game:GetService("Stats"))
+    local ContentProvider = cloneref(game:GetService("ContentProvider"))
+    local CoreGui = cloneref(game:GetService("CoreGui"))
 
-		while task.wait() do
-			if gcinfo() >= Maxima then Maxima = gcinfo() else break end
-		end
-		task.wait(0.30)
-		
-		local OldGcInfo = gcinfo() + Amplitude
-		local tick = 0
-		local function getreturn()
-			local Formula = ((acos(cos(pi * (tick)))/pi * (Amplitude * 2)) + -Amplitude )
-			return floor(OldGcInfo + Formula)
-		end
+    task.spawn(function()
+        repeat task.wait() until game:IsLoaded()
+        local Amplitude = 200
+        local RandomValue = { -200, 200 }
+        local RandomTime = { .1, 1 }
+        local floor = math.floor
+        local cos = math.cos
+        local acos = math.acos
+        local pi = math.pi
+        local Maxima = 0
 
-		local Old; Old = hookfunction(getrenv().gcinfo, function(...) return getreturn() end)
-		local Old2; Old2 = hookfunction(getrenv().collectgarbage, function(arg, ...)
-			local suc, err = pcall(Old2, arg, ...)
-			if suc and arg == "count" then return getreturn() end
-			return Old2(arg, ...)
-		end)
+        while task.wait() do
+            if gcinfo() >= Maxima then Maxima = gcinfo() else break end
+        end
+        task.wait(0.30)
 
-		RunService.Stepped:Connect(function()
-			local Formula = ((acos(cos(pi * (tick)))/pi * (Amplitude * 2)) + -Amplitude )
-			if Formula > ((acos(cos(pi * (tick)+.01))/pi * (Amplitude * 2)) + -Amplitude ) then
-				tick = tick + .07
-			else
-				tick = tick + 0.01
-			end
-		end)
-	end)
+        local OldGcInfo = gcinfo() + Amplitude
+        local tick = 0
+        local function getreturn()
+            local Formula = ((acos(cos(pi * (tick))) / pi * (Amplitude * 2)) + -Amplitude)
+            return floor(OldGcInfo + Formula)
+        end
 
-	task.spawn(function()
-		repeat task.wait() until game:IsLoaded()
-		local CurrMem = Stats:GetTotalMemoryUsageMb()
-		local Rand = 0
-		RunService.Stepped:Connect(function()
-			Rand = Random.new():NextNumber(-10, 10)
-		end)
-		local function GetReturn() return CurrMem + Rand end
-		
-		local _MemBypass
-		_MemBypass = hookmetamethod(game, "__namecall", function(self, ...)
-			local method = getnamecallmethod()
-			if not checkcaller() and typeof(self) == "Instance" and (method == "GetTotalMemoryUsageMb" or method == "getTotalMemoryUsageMb") and self.ClassName == "Stats" then
-				return GetReturn()
-			end
-			return _MemBypass(self, ...)
-		end)
-	end)
+        local Old; Old = hookfunction(getrenv().gcinfo, function(...) return getreturn() end)
+        local Old2; Old2 = hookfunction(getrenv().collectgarbage, function(arg, ...)
+            local suc, err = pcall(Old2, arg, ...)
+            if suc and arg == "count" then return getreturn() end
+            return Old2(arg, ...)
+        end)
 
-	task.spawn(function()
-		local coreguiTable = {}
-		local gameTable = {}
-		
-		pcall(function()
-			for i, v in pairs(game:GetDescendants()) do
-				if v:IsA("ImageLabel") and v.Image:find('rbxassetid://') and not v:IsDescendantOf(CoreGui) then
-					table.insert(gameTable, v.Image)
-				end
-			end
-		end)
+        RunService.Stepped:Connect(function()
+            local Formula = ((acos(cos(pi * (tick))) / pi * (Amplitude * 2)) + -Amplitude)
+            if Formula > ((acos(cos(pi * (tick) + .01)) / pi * (Amplitude * 2)) + -Amplitude) then
+                tick = tick + .07
+            else
+                tick = tick + 0.01
+            end
+        end)
+    end)
 
-		local function randomizeTable(t)
-			local n = #t
-			local new = {unpack(t)} 
-			while n > 2 do
-				local k = math.random(n)
-				new[n], new[k] = new[k], new[n]
-				n = n - 1
-			end
-			return new
-		end
+    task.spawn(function()
+        repeat task.wait() until game:IsLoaded()
+        local CurrMem = Stats:GetTotalMemoryUsageMb()
+        local Rand = 0
+        RunService.Stepped:Connect(function()
+            Rand = Random.new():NextNumber(-10, 10)
+        end)
+        local function GetReturn() return CurrMem + Rand end
 
-		local CPBypass
-		CPBypass = hookmetamethod(game, "__namecall", function(self, Instances, ...)
-			local method = getnamecallmethod()
-			if not checkcaller() and (method == "preloadAsync" or method == "PreloadAsync") then
-				if Instances and type(Instances) == "table" and Instances[1] then
-					if Instances[1] == CoreGui or Instances[1] == game then
-						return CPBypass(self, randomizeTable(gameTable), ...)
-					end
-				end
-			end
-			return CPBypass(self, Instances, ...)
-		end)
-	end)
+        local _MemBypass
+        _MemBypass = hookmetamethod(game, "__namecall", function(self, ...)
+            local method = getnamecallmethod()
+            if not checkcaller() and typeof(self) == "Instance" and (method == "GetTotalMemoryUsageMb" or method == "getTotalMemoryUsageMb") and self.ClassName == "Stats" then
+                return GetReturn()
+            end
+            return _MemBypass(self, ...)
+        end)
+    end)
 
-	local TextboxBypass
-	TextboxBypass = hookmetamethod(game, "__namecall", function(self, ...)
-		local method = getnamecallmethod()
-		if not checkcaller() and method == "GetFocusedTextBox" and self.ClassName == "UserInputService" then
-			local Textbox = TextboxBypass(self, ...)
-			if Textbox and Textbox:IsDescendantOf(CoreGui) then
-				return nil 
-			end
-			return Textbox
-		end
-		return TextboxBypass(self, ...)
-	end)
+    task.spawn(function()
+        local coreguiTable = {}
+        local gameTable = {}
 
+        pcall(function()
+            for i, v in pairs(game:GetDescendants()) do
+                if v:IsA("ImageLabel") and v.Image:find('rbxassetid://') and not v:IsDescendantOf(CoreGui) then
+                    table.insert(gameTable, v.Image)
+                end
+            end
+        end)
+
+        local function randomizeTable(t)
+            local n = #t
+            local new = { unpack(t) }
+            while n > 2 do
+                local k = math.random(n)
+                new[n], new[k] = new[k], new[n]
+                n = n - 1
+            end
+            return new
+        end
+
+        local CPBypass
+        CPBypass = hookmetamethod(game, "__namecall", function(self, Instances, ...)
+            local method = getnamecallmethod()
+            if not checkcaller() and (method == "preloadAsync" or method == "PreloadAsync") then
+                if Instances and type(Instances) == "table" and Instances[1] then
+                    if Instances[1] == CoreGui or Instances[1] == game then
+                        return CPBypass(self, randomizeTable(gameTable), ...)
+                    end
+                end
+            end
+            return CPBypass(self, Instances, ...)
+        end)
+    end)
+
+    local TextboxBypass
+    TextboxBypass = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if not checkcaller() and method == "GetFocusedTextBox" and self.ClassName == "UserInputService" then
+            local Textbox = TextboxBypass(self, ...)
+            if Textbox and Textbox:IsDescendantOf(CoreGui) then
+                return nil
+            end
+            return Textbox
+        end
+        return TextboxBypass(self, ...)
+    end)
 end
 
 getgenv().blockedRemotes = {}
@@ -134,8 +133,8 @@ local EmbeddedModules = {
 ]]
 
         -- Common Locals
-        local Main, Lib, Apps, Settings            -- Main Containers
-        local Explorer, Properties, ScriptViewer, Notebook -- Major Apps
+        local Main, Lib, Apps, Settings                         -- Main Containers
+        local Explorer, Properties, ScriptViewer, Notebook      -- Major Apps
         local API, RMD, env, service, plr, create, createSimple -- Main Locals
 
         local function initDeps(data)
@@ -584,7 +583,7 @@ local EmbeddedModules = {
                 Explorer.MaxNameWidth = maxNameWidth
                 Explorer.MaxDepth = maxDepth
                 Explorer.ViewWidth = useNameWidth and Explorer.EntryIndent * maxDepth + maxNameWidth + 26 or
-                Explorer.EntryIndent * maxDepth + 226
+                    Explorer.EntryIndent * maxDepth + 226
                 Explorer.UpdateView()
             end
 
@@ -719,28 +718,28 @@ local EmbeddedModules = {
                         local listOffsetY = startY - treeFrame.AbsolutePosition.Y
 
                         releaseEvent = cloneref(game["Run Service"].Parent:GetService("UserInputService")).InputEnded
-                        :Connect(function(input)
-                            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                                releaseEvent:Disconnect()
-                                mouseEvent:Disconnect()
-                            end
-                        end)
-
-                        mouseEvent = cloneref(game["Run Service"].Parent:GetService("UserInputService")).InputChanged
-                        :Connect(function(input)
-                            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                                local deltaX = mouse.X - startX
-                                local deltaY = mouse.Y - startY
-                                local dist = math.sqrt(deltaX ^ 2 + deltaY ^ 2)
-
-                                if dist > 5 then
+                            :Connect(function(input)
+                                if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                     releaseEvent:Disconnect()
                                     mouseEvent:Disconnect()
-                                    isRenaming = false
-                                    Explorer.StartDrag(listOffsetX, listOffsetY)
                                 end
-                            end
-                        end)
+                            end)
+
+                        mouseEvent = cloneref(game["Run Service"].Parent:GetService("UserInputService")).InputChanged
+                            :Connect(function(input)
+                                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                                    local deltaX = mouse.X - startX
+                                    local deltaY = mouse.Y - startY
+                                    local dist = math.sqrt(deltaX ^ 2 + deltaY ^ 2)
+
+                                    if dist > 5 then
+                                        releaseEvent:Disconnect()
+                                        mouseEvent:Disconnect()
+                                        isRenaming = false
+                                        Explorer.StartDrag(listOffsetX, listOffsetY)
+                                    end
+                                end
+                            end)
                     end
                 end)
 
@@ -918,10 +917,14 @@ local EmbeddedModules = {
                     descendantAddedCon = game["Run Service"].Parent.DescendantAdded:Connect(addObject)
                     descendantRemovingCon = game["Run Service"].Parent.DescendantRemoving:Connect(removeObject)
                 else
-                    descendantAddedCon = game["Run Service"].Parent.DescendantAdded:Connect(function(obj) pcall(
-                        addObject, obj) end)
-                    descendantRemovingCon = game["Run Service"].Parent.DescendantRemoving:Connect(function(obj) pcall(
-                        removeObject, obj) end)
+                    descendantAddedCon = game["Run Service"].Parent.DescendantAdded:Connect(function(obj)
+                        pcall(
+                            addObject, obj)
+                    end)
+                    descendantRemovingCon = game["Run Service"].Parent.DescendantRemoving:Connect(function(obj)
+                        pcall(
+                            removeObject, obj)
+                    end)
                 end
 
                 if Settings.Explorer.UseNameWidth then
@@ -1039,9 +1042,9 @@ local EmbeddedModules = {
                 context:AddRegistered("GET_REFERENCES")
                 context:AddRegistered("VIEW_API")
                 if presentClasses["RemoteEvent"] or presentClasses["RemoteFunction"] then
-			    context:AddRegistered("BLOCK_REMOTE")
-			    context:AddRegistered("UNBLOCK_REMOTE")
-		        end
+                    context:AddRegistered("BLOCK_REMOTE")
+                    context:AddRegistered("UNBLOCK_REMOTE")
+                end
 
 
                 context:QueueDivider()
@@ -1051,16 +1054,22 @@ local EmbeddedModules = {
                     context:AddRegistered("VIEW_OBJECT")
                 end
 
-                if presentClasses["TouchTransmitter"] then context:AddRegistered("FIRE_TOUCHTRANSMITTER",
-                        firetouchinterest == nil) end
-                if presentClasses["ClickDetector"] then context:AddRegistered("FIRE_CLICKDETECTOR",
-                        fireclickdetector == nil) end
-                if presentClasses["ProximityPrompt"] then context:AddRegistered("FIRE_PROXIMITYPROMPT",
-                        fireproximityprompt == nil) end
+                if presentClasses["TouchTransmitter"] then
+                    context:AddRegistered("FIRE_TOUCHTRANSMITTER",
+                        firetouchinterest == nil)
+                end
+                if presentClasses["ClickDetector"] then
+                    context:AddRegistered("FIRE_CLICKDETECTOR",
+                        fireclickdetector == nil)
+                end
+                if presentClasses["ProximityPrompt"] then
+                    context:AddRegistered("FIRE_PROXIMITYPROMPT",
+                        fireproximityprompt == nil)
+                end
                 if presentClasses["Player"] then context:AddRegistered("SELECT_CHARACTER") end
-                	if presentClasses["RemoteEvent"] or presentClasses["BindableEvent"] then
-		context:AddRegistered("GETCONNECTIONS")
-	end
+                if presentClasses["RemoteEvent"] or presentClasses["BindableEvent"] then
+                    context:AddRegistered("GETCONNECTIONS")
+                end
                 if presentClasses["Players"] then context:AddRegistered("SELECT_LOCAL_PLAYER") end
                 if presentClasses["LuaSourceContainer"] then context:AddRegistered("VIEW_SCRIPT") end
                 context:AddRegistered("DUMPCONSTANTS")
@@ -1075,24 +1084,23 @@ local EmbeddedModules = {
             end
 
             Explorer.InitRightClick = function()
+                if not getgenv().DexHooks then
+                    getgenv().DexHooks = true
+                    local mt = getrawmetatable(game)
+                    setreadonly(mt, false)
+                    local oldNamecall = mt.__namecall
 
-		if not getgenv().DexHooks then
-			getgenv().DexHooks = true
-			local mt = getrawmetatable(game)
-			setreadonly(mt, false)
-			local oldNamecall = mt.__namecall
-			
-			mt.__namecall = newcclosure(function(self, ...)
-				local method = getnamecallmethod()
-				-- USE getgenv().blockedRemotes HERE
-				if (method == "FireServer" or method == "InvokeServer") and getgenv().blockedRemotes[self] then
-					warn("Blocked " .. self.Name .. " from firing.")
-					return nil
-				end
-				return oldNamecall(self, ...)
-			end)
-			setreadonly(mt, true)
-		end
+                    mt.__namecall = newcclosure(function(self, ...)
+                        local method = getnamecallmethod()
+                        -- USE getgenv().blockedRemotes HERE
+                        if (method == "FireServer" or method == "InvokeServer") and getgenv().blockedRemotes[self] then
+                            warn("Blocked " .. self.Name .. " from firing.")
+                            return nil
+                        end
+                        return oldNamecall(self, ...)
+                    end)
+                    setreadonly(mt, true)
+                end
 
                 local context = Lib.ContextMenu.new()
 
@@ -1121,32 +1129,32 @@ local EmbeddedModules = {
                         end
                     })
 
-		context:Register("BLOCK_REMOTE", {
-			Name = "Block Remote",
-			OnClick = function()
-				local list = selection.List
-				for i = 1, #list do
-					if list[i].Obj then
-						getgenv().blockedRemotes[list[i].Obj] = true -- HERE
-						warn("Blocked: " .. list[i].Obj.Name)
-					end
-				end
-			end
-		})
+                context:Register("BLOCK_REMOTE", {
+                    Name = "Block Remote",
+                    OnClick = function()
+                        local list = selection.List
+                        for i = 1, #list do
+                            if list[i].Obj then
+                                getgenv().blockedRemotes[list[i].Obj] = true -- HERE
+                                warn("Blocked: " .. list[i].Obj.Name)
+                            end
+                        end
+                    end
+                })
 
 
-		context:Register("UNBLOCK_REMOTE", {
-			Name = "Unblock",
-			OnClick = function()
-				local list = selection.List
-				for i = 1, #list do
-					if list[i].Obj then
-						getgenv().blockedRemotes[list[i].Obj] = nil -- This is the important part
-						warn("Unblocked: " .. list[i].Obj.Name)
-					end
-				end
-			end
-		})
+                context:Register("UNBLOCK_REMOTE", {
+                    Name = "Unblock",
+                    OnClick = function()
+                        local list = selection.List
+                        for i = 1, #list do
+                            if list[i].Obj then
+                                getgenv().blockedRemotes[list[i].Obj] = nil -- This is the important part
+                                warn("Unblocked: " .. list[i].Obj.Name)
+                            end
+                        end
+                    end
+                })
 
 
                 context:Register("COPY",
@@ -1498,10 +1506,14 @@ local EmbeddedModules = {
                 })
 
                 local clth = function(str)
-                    if str:sub(1, 28) == "game:GetService(\"Workspace\")" then str = str:gsub(
-                        "game:GetService%(\"Workspace\"%)", "workspace", 1) end
-                    if str:sub(1, 27 + #plr.Name) == "game:GetService(\"Players\")." .. plr.Name then str = str:gsub(
-                        "game:GetService%(\"Players\"%)." .. plr.Name, "game:GetService(\"Players\").LocalPlayer", 1) end
+                    if str:sub(1, 28) == "game:GetService(\"Workspace\")" then
+                        str = str:gsub(
+                            "game:GetService%(\"Workspace\"%)", "workspace", 1)
+                    end
+                    if str:sub(1, 27 + #plr.Name) == "game:GetService(\"Players\")." .. plr.Name then
+                        str = str:gsub(
+                            "game:GetService%(\"Players\"%)." .. plr.Name, "game:GetService(\"Players\").LocalPlayer", 1)
+                    end
                     return str
                 end
 
@@ -1539,74 +1551,73 @@ local EmbeddedModules = {
                         end
                     })
 
-		context:Register("DUMPCONSTANTS", {
-			Name = "Dump Constants",
-			OnClick = function()
-				local list = selection.List
-				for i = 1, #list do
-					local obj = list[i].Obj
-					if obj:IsA("LuaSourceContainer") then
-						-- Use pcall in case the executor doesn't support it
-						local s, constants = pcall(function() return getconstants(getscriptclosure(obj)) end)
-						if s and constants then
-							print("Constants for " .. obj.Name .. "")
-							for k, v in pairs(constants) do
-								print("[" .. k .. "] " .. tostring(v))
-							end
-						else
-							warn("Failed to dump constants (Executor missing function or script protected)")
-						end
-					end
-				end
-			end
-		})
+                context:Register("DUMPCONSTANTS", {
+                    Name = "Dump Constants",
+                    OnClick = function()
+                        local list = selection.List
+                        for i = 1, #list do
+                            local obj = list[i].Obj
+                            if obj:IsA("LuaSourceContainer") then
+                                local s, constants = pcall(function() return getconstants(getscriptclosure(obj)) end)
+                                if s and constants then
+                                    print("Constants for " .. obj.Name .. "")
+                                    for k, v in pairs(constants) do
+                                        print("[" .. k .. "] " .. tostring(v))
+                                    end
+                                else
+                                    warn("Failed to dump constants (Executor missing function or script protected)")
+                                end
+                            end
+                        end
+                    end
+                })
 
- 	context:Register("GETCONNECTIONS", {
-		Name = "Print Connections",
-		OnClick = function()
-			local list = selection.List
-			for i = 1, #list do
-				local obj = list[i].Obj
-				local signal
-				
-				if obj:IsA("RemoteEvent") then signal = obj.OnClientEvent end
-				if obj:IsA("BindableEvent") then signal = obj.Event end
-				
-				if signal then
-					local s, cons = pcall(getconnections, signal)
-					
-					print("Scan for: " .. obj.Name)
-					
-					if s and cons then
-						print("Total Connections Found: " .. #cons)
-						
-						for i, c in pairs(cons) do
-							print("[Connection " .. i .. "]")
-							print("enabled: " .. tostring(c.Enabled))
-							print("foreign: " .. tostring(c.ForeignState))
-							print("lua_closure: " .. tostring(c.LuaConnection))
-							
-							local func = c.Function
-							if func then
-								print("    function: " .. tostring(func))
-								local s2, scriptRef = pcall(function() return getfenv(func).script end)
-								if s2 and scriptRef then
-									print("Script Path: " .. scriptRef:GetFullName())
-								else
-									print("SCRIPT: (Could not resolve script)")
-								end
-							else
-								print("    function: nil (C closure?)")
-							end
-						end
-					else
-						warn("getconnections failed or returned nil")
-					end
-				end
-			end
-		end
+                context:Register("GETCONNECTIONS", {
+                    Name = "Print Connections",
+                    OnClick = function()
+                        local list = selection.List
+                        for i = 1, #list do
+                            local obj = list[i].Obj
+                            local signal
 
-	})
+                            if obj:IsA("RemoteEvent") then signal = obj.OnClientEvent end
+                            if obj:IsA("BindableEvent") then signal = obj.Event end
+
+                            if signal then
+                                local s, cons = pcall(getconnections, signal)
+
+                                print("Scan for: " .. obj.Name)
+
+                                if s and cons then
+                                    print("Total Connections Found: " .. #cons)
+
+                                    for i, c in pairs(cons) do
+                                        print("[Connection " .. i .. "]")
+                                        print("enabled: " .. tostring(c.Enabled))
+                                        print("foreign: " .. tostring(c.ForeignState))
+                                        print("lua_closure: " .. tostring(c.LuaConnection))
+
+                                        local func = c.Function
+                                        if func then
+                                            print("function: " .. tostring(func))
+                                            local s2, scriptRef = pcall(function() return getfenv(func).script end)
+                                            if s2 and scriptRef then
+                                                print("Script Path: " .. scriptRef:GetFullName())
+                                            else
+                                                print("Could not resolve script")
+                                            end
+                                        else
+                                            print("function: nil (C closure?)")
+                                        end
+                                    end
+                                else
+                                    warn("getconnections failed or returned nil")
+                                end
+                            end
+                        end
+                    end
+
+                })
 
 
                 context:Register("CALL_FUNCTION",
@@ -1687,8 +1698,11 @@ local EmbeddedModules = {
                         OnClick = function()
                             local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
                             if not hrp then return end
-                            for _, v in ipairs(selection.List) do if v.Obj and v.Obj:IsA("TouchTransmitter") then
-                                    firetouchinterest(hrp, v.Obj.Parent, 0) end end
+                            for _, v in ipairs(selection.List) do
+                                if v.Obj and v.Obj:IsA("TouchTransmitter") then
+                                    firetouchinterest(hrp, v.Obj.Parent, 0)
+                                end
+                            end
                         end
                     })
 
@@ -1700,8 +1714,11 @@ local EmbeddedModules = {
                         OnClick = function()
                             local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
                             if not hrp then return end
-                            for _, v in ipairs(selection.List) do if v.Obj and v.Obj:IsA("ClickDetector") then
-                                    fireclickdetector(v.Obj) end end
+                            for _, v in ipairs(selection.List) do
+                                if v.Obj and v.Obj:IsA("ClickDetector") then
+                                    fireclickdetector(v.Obj)
+                                end
+                            end
                         end
                     })
 
@@ -1713,8 +1730,11 @@ local EmbeddedModules = {
                         OnClick = function()
                             local hrp = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
                             if not hrp then return end
-                            for _, v in ipairs(selection.List) do if v.Obj and v.Obj:IsA("ProximityPrompt") then
-                                    fireproximityprompt(v.Obj) end end
+                            for _, v in ipairs(selection.List) do
+                                if v.Obj and v.Obj:IsA("ProximityPrompt") then
+                                    fireproximityprompt(v.Obj)
+                                end
+                            end
                         end
                     })
 
@@ -1763,10 +1783,12 @@ local EmbeddedModules = {
                         IconMap = Explorer.ClassIcons,
                         Icon = 9,
                         OnClick = function()
-                            pcall(function() if nodes[plr] then
+                            pcall(function()
+                                if nodes[plr] then
                                     selection:Set(nodes[plr])
                                     Explorer.ViewNode(nodes[plr])
-                                end end)
+                                end
+                            end)
                         end
                     })
 
@@ -1981,161 +2003,160 @@ local EmbeddedModules = {
                 Explorer.InsertObjectContext = context
             end
 
-Explorer.SearchFilters = { -- TODO: Use data table (so we can disable some if funcs don't exist)
-	Comparison = {
-		isa = function(argString)
-			local lower = string.lower
-			local find = string.find
-			local classQuery = string.split(argString)[1]
-			if not classQuery then return end
-			classQuery = lower(classQuery)
-			
-			local className
-			for class, _ in pairs(API.Classes) do
-				local cName = lower(class)
-				if cName == classQuery then
-					className = class
-					break
-				elseif find(cName, classQuery, 1, true) then
-					className = class
-				end
-			end
-			
-			if not className then return end
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"]]..className..[[")]]
-			}
-		end,
-		
-		rad = function(argString)
-			local num = tonumber(argString)
-			if not num then return end
-			
-			if not service.Players.LocalPlayer.Character or not service.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") or not service.Players.LocalPlayer.Character.HumanoidRootPart:IsA("BasePart") then
-				return
-			end
-			
-			return {
-				Headers = {[[local isa = game.IsA]], [[local hrp = service.Players.LocalPlayer.Character.HumanoidRootPart]]},
-				Setups = {[[local hrpPos = hrp.Position]]},
-				ObjectDefs = {[[local isBasePart = isa(obj,"BasePart")]]},
-				Predicate = [[isBasePart and (obj.Position-hrpPos).Magnitude <= ]]..num
-			}
-		end
-	},
-	Specific = {
-		players = function()
-			return function()
-				return service.Players:GetPlayers()
-			end
-		end,
-		
-		loadedmodules = function()
-			return env.getloadedmodules
-		end
-	},
-	Default = function(argString,caseSensitive)
-		-- Custom shortcuts
-		if argString == "remotes" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"RemoteEvent") or isa(obj,"RemoteFunction")]]
-			}
-		elseif argString == "bindables" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"BindableEvent") or isa(obj,"BindableFunction")]]
-			}
-		elseif argString == "scripts" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"LuaSourceContainer")]]
-			}
-		elseif argString == "modules" then 
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"ModuleScript")]]
-			}
-		elseif argString == "localscript" then   
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"LocalScript")]]
-			}
-		elseif argString == "server" then  
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"Script")]] 
-			}
-		elseif argString == "nil" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[not obj:IsDescendantOf(game) or obj.Name:sub(1,1) == "@"]] -- Finds nil instances or hidden services
-			}
-		elseif argString == "touched" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[obj:FindFirstChild("TouchInterest") ~= nil]]
-			}
-		elseif argString == "click" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[obj:FindFirstChild("ClickDetector") ~= nil or isa(obj,"ClickDetector")]]
-			}
-		elseif argString == "gui" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"ScreenGui") or isa(obj,"GuiObject")]]
-			}
-		elseif argString == "values" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"ValueBase")]] -- Covers IntValue, BoolValue, StringValue, etc.
-			}
-		elseif argString == "tools" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"Tool") or isa(obj,"HopperBin")]]
-			}
-		elseif argString == "unanchored" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"BasePart") and not obj.Anchored]]
-			}
-		elseif argString == "prompts" then
-			return {
-				Headers = {[[local isa = game.IsA]]},
-				Predicate = [[isa(obj,"ProximityPrompt")]]
-			}
-		end
+            Explorer.SearchFilters = { -- TODO: Use data table (so we can disable some if funcs don't exist)
+                Comparison = {
+                    isa = function(argString)
+                        local lower = string.lower
+                        local find = string.find
+                        local classQuery = string.split(argString)[1]
+                        if not classQuery then return end
+                        classQuery = lower(classQuery)
 
-		local cleanString = argString:gsub('"', '')
-		if caseSensitive then
-			return {
-				Headers = {[[local find = string.find]]},
-				ObjectDefs = {[[local objName = tostring(obj)]]},
-				Predicate = [[find(objName, "]] .. cleanString .. [[",1,true)]]
-			}
-		else
-			return {
-				Headers = {[[local lower = string.lower]],[[local find = string.find]],[[local tostring = tostring]]},
-				ObjectDefs = {[[local lowerName = lower(tostring(obj))]]},
-				Predicate = [[find(lowerName, "]] .. cleanString:lower() .. [[",1,true)]]
-			}
-		end
-	end,
+                        local className
+                        for class, _ in pairs(API.Classes) do
+                            local cName = lower(class)
+                            if cName == classQuery then
+                                className = class
+                                break
+                            elseif find(cName, classQuery, 1, true) then
+                                className = class
+                            end
+                        end
 
-	SpecificDefault = function(n)
-		return {
-			Headers = {},
-			ObjectDefs = { "local isSpec" .. n .. " = specResults[" .. n .. "][node]" },
-			Predicate = "isSpec" .. n
-		}
-	end
-} 
+                        if not className then return end
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"]] .. className .. [[")]]
+                        }
+                    end,
 
-Explorer.BuildSearchFunc = function(query)
+                    rad = function(argString)
+                        local num = tonumber(argString)
+                        if not num then return end
 
+                        if not service.Players.LocalPlayer.Character or not service.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") or not service.Players.LocalPlayer.Character.HumanoidRootPart:IsA("BasePart") then
+                            return
+                        end
+
+                        return {
+                            Headers = { [[local isa = game.IsA]], [[local hrp = service.Players.LocalPlayer.Character.HumanoidRootPart]] },
+                            Setups = { [[local hrpPos = hrp.Position]] },
+                            ObjectDefs = { [[local isBasePart = isa(obj,"BasePart")]] },
+                            Predicate = [[isBasePart and (obj.Position-hrpPos).Magnitude <= ]] .. num
+                        }
+                    end
+                },
+                Specific = {
+                    players = function()
+                        return function()
+                            return service.Players:GetPlayers()
+                        end
+                    end,
+
+                    loadedmodules = function()
+                        return env.getloadedmodules
+                    end
+                },
+                Default = function(argString, caseSensitive)
+                    -- Custom shortcuts
+                    if argString == "remotes" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"RemoteEvent") or isa(obj,"RemoteFunction")]]
+                        }
+                    elseif argString == "bindables" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"BindableEvent") or isa(obj,"BindableFunction")]]
+                        }
+                    elseif argString == "scripts" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"LuaSourceContainer")]]
+                        }
+                    elseif argString == "modules" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"ModuleScript")]]
+                        }
+                    elseif argString == "localscript" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"LocalScript")]]
+                        }
+                    elseif argString == "server" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"Script")]]
+                        }
+                    elseif argString == "nil" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[not obj:IsDescendantOf(game) or obj.Name:sub(1,1) == "@"]]
+                        }
+                    elseif argString == "touched" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[obj:FindFirstChild("TouchInterest") ~= nil]]
+                        }
+                    elseif argString == "click" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[obj:FindFirstChild("ClickDetector") ~= nil or isa(obj,"ClickDetector")]]
+                        }
+                    elseif argString == "gui" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"ScreenGui") or isa(obj,"GuiObject")]]
+                        }
+                    elseif argString == "values" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"ValueBase")]]
+                        }
+                    elseif argString == "tools" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"Tool") or isa(obj,"HopperBin")]]
+                        }
+                    elseif argString == "unanchored" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"BasePart") and not obj.Anchored]]
+                        }
+                    elseif argString == "prompts" then
+                        return {
+                            Headers = { [[local isa = game.IsA]] },
+                            Predicate = [[isa(obj,"ProximityPrompt")]]
+                        }
+                    end
+
+                    local cleanString = argString:gsub('"', '')
+                    if caseSensitive then
+                        return {
+                            Headers = { [[local find = string.find]] },
+                            ObjectDefs = { [[local objName = tostring(obj)]] },
+                            Predicate = [[find(objName, "]] .. cleanString .. [[",1,true)]]
+                        }
+                    else
+                        return {
+                            Headers = { [[local lower = string.lower]], [[local find = string.find]], [[local tostring = tostring]] },
+                            ObjectDefs = { [[local lowerName = lower(tostring(obj))]] },
+                            Predicate = [[find(lowerName, "]] .. cleanString:lower() .. [[",1,true)]]
+                        }
+                    end
+                end,
+
+                SpecificDefault = function(n)
+                    return {
+                        Headers = {},
+                        ObjectDefs = { "local isSpec" .. n .. " = specResults[" .. n .. "][node]" },
+                        Predicate = "isSpec" .. n
+                    }
+                end
+            }
+
+            Explorer.BuildSearchFunc = function(query)
                 local specFilterList, specMap = {}, {}
                 local finalPredicate = ""
                 local rep = string.rep
@@ -2223,7 +2244,7 @@ Explorer.BuildSearchFunc = function(query)
                     local nextData = foundData[nextInd] or { 1 }
                     local op = ops[nextData[2]]
                     local term = sub(query, init, nextInd - 1)
-                    term = match(term, "^%s*(.-)%s*$") or "" -- Trim
+                    term = match(term, "^%s*(.-)%s*$") or ""
 
                     if #term > 0 then
                         if sub(term, 1, 1) == "!" then
@@ -2330,13 +2351,13 @@ return search]==]
                 if not s or not func then return nil, specFilterList end
 
                 local env = setmetatable(
-                {
-                    ["searchResults"] = searchResults,
-                    ["nodes"] = nodes,
-                    ["Explorer"] = Explorer,
-                    ["specResults"] = specResults,
-                    ["service"] = service
-                }, { __index = getfenv() })
+                    {
+                        ["searchResults"] = searchResults,
+                        ["nodes"] = nodes,
+                        ["Explorer"] = Explorer,
+                        ["specResults"] = specResults,
+                        ["service"] = service
+                    }, { __index = getfenv() })
                 setfenv(func, env)
 
                 return func(), specFilterList
@@ -2818,8 +2839,8 @@ return search]==]
 ]]
 
         -- Common Locals
-        local Main, Lib, Apps, Settings            -- Main Containers
-        local Explorer, Properties, ScriptViewer, Notebook -- Major Apps
+        local Main, Lib, Apps, Settings                         -- Main Containers
+        local Explorer, Properties, ScriptViewer, Notebook      -- Major Apps
         local API, RMD, env, service, plr, create, createSimple -- Main Locals
 
         local function initDeps(data)
@@ -2872,8 +2893,14 @@ return search]==]
             Properties.SearchText = ""
 
             Properties.AddAttributeProp = { Category = "Attributes", Class = "", Name = "", SpecialRow = "AddAttribute", Tags = {} }
-            Properties.SoundPreviewProp = { Category = "Data", ValueType = { Name = "SoundPlayer" }, Class = "Sound", Name =
-            "Preview", Tags = {} }
+            Properties.SoundPreviewProp = {
+                Category = "Data",
+                ValueType = { Name = "SoundPlayer" },
+                Class = "Sound",
+                Name =
+                "Preview",
+                Tags = {}
+            }
 
             Properties.IgnoreProps = {
                 ["DataModel"] = {
@@ -3001,8 +3028,10 @@ return search]==]
                     local vals = str:gsub("[{}]", ""):split(",")
                     local xScale, xOffset, yScale, yOffset = tonumber(vals[1]), tonumber(vals[2]), tonumber(vals[3]),
                         tonumber(vals[4])
-                    if xScale and xOffset and yScale and yOffset and #vals >= 4 then return UDim2.new(xScale, xOffset,
-                            yScale, yOffset) end
+                    if xScale and xOffset and yScale and yOffset and #vals >= 4 then
+                        return UDim2.new(xScale, xOffset,
+                            yScale, yOffset)
+                    end
                 elseif typeName == "CFrame" then
                     local vals = str:split(",")
                     local s, result = pcall(CFrame.new, unpack(vals))
@@ -3276,10 +3305,19 @@ return search]==]
                             local typ = typeof(val)
                             if not foundAttrs[name] then
                                 local category = (typ == "Instance" and "Class") or (typ == "EnumItem" and "Enum") or
-                                "Other"
+                                    "Other"
                                 local valType = { Name = typeNameConvert[typ] or typ, Category = category }
-                                local attrProp = { IsAttribute = true, Name = "ATTR_" .. name, AttributeName = name, DisplayName =
-                                name, Class = "Instance", ValueType = valType, Category = "Attributes", Tags = {} }
+                                local attrProp = {
+                                    IsAttribute = true,
+                                    Name = "ATTR_" .. name,
+                                    AttributeName = name,
+                                    DisplayName =
+                                        name,
+                                    Class = "Instance",
+                                    ValueType = valType,
+                                    Category = "Attributes",
+                                    Tags = {}
+                                }
                                 props[propCount] = attrProp
                                 propCount = propCount + 1
                                 attrCount = attrCount + 1
@@ -3543,7 +3581,7 @@ return search]==]
                     if not prop or input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
 
                     local fullName = (prop.CategoryName and "CAT_" .. prop.CategoryName) or
-                    prop.Class .. "." .. prop.Name .. (prop.SubName or "")
+                        prop.Class .. "." .. prop.Name .. (prop.SubName or "")
 
                     Main.MiscIcons:DisplayByKey(newEntry.NameFrame.Expand.Icon,
                         expanded[fullName] and "Collapse_Over" or "Expand_Over")
@@ -3554,7 +3592,7 @@ return search]==]
                     if not prop or input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
 
                     local fullName = (prop.CategoryName and "CAT_" .. prop.CategoryName) or
-                    prop.Class .. "." .. prop.Name .. (prop.SubName or "")
+                        prop.Class .. "." .. prop.Name .. (prop.SubName or "")
 
                     Main.MiscIcons:DisplayByKey(newEntry.NameFrame.Expand.Icon,
                         expanded[fullName] and "Collapse" or "Expand")
@@ -3565,7 +3603,7 @@ return search]==]
                     if not prop then return end
 
                     local fullName = (prop.CategoryName and "CAT_" .. prop.CategoryName) or
-                    prop.Class .. "." .. prop.Name .. (prop.SubName or "")
+                        prop.Class .. "." .. prop.Name .. (prop.SubName or "")
                     if not prop.CategoryName and not Properties.ExpandableTypes[prop.ValueType and prop.ValueType.Name] and not Properties.ExpandableProps[fullName] then return end
 
                     expanded[fullName] = not expanded[fullName]
@@ -3619,7 +3657,8 @@ return search]==]
                     if not prop then return end
 
                     local fullName = prop.Class .. "." .. prop.Name .. (prop.SubName or "")
-                    local inputFullName = inputProp and (inputProp.Class .. "." .. inputProp.Name .. (inputProp.SubName or ""))
+                    local inputFullName = inputProp and
+                    (inputProp.Class .. "." .. inputProp.Name .. (inputProp.SubName or ""))
 
                     if fullName == inputFullName and inputProp.ValueType.Category == "Class" then
                         inputProp = nil
@@ -3867,8 +3906,17 @@ return search]==]
 
                         local typ = typeChooser.Selected
                         local valType = { Name = Properties.TypeNameConvert[typ] or typ, Category = "DataType" }
-                        local attrProp = { IsAttribute = true, Name = "ATTR_" .. name, AttributeName = name, DisplayName =
-                        name, Class = "Instance", ValueType = valType, Category = "Attributes", Tags = {} }
+                        local attrProp = {
+                            IsAttribute = true,
+                            Name = "ATTR_" .. name,
+                            AttributeName = name,
+                            DisplayName =
+                                name,
+                            Class = "Instance",
+                            ValueType = valType,
+                            Category = "Attributes",
+                            Tags = {}
+                        }
 
                         Settings.Properties.ShowAttributes = true
                         Properties.SetProp(attrProp, Properties.DefaultPropValue[valType.Name], true,
@@ -3895,7 +3943,7 @@ return search]==]
                 local typeName = typeData.Name
 
                 return typeName ~= "bool" and typeData.Category ~= "Enum" and typeData.Category ~= "Class" and
-                typeName ~= "BrickColor"
+                    typeName ~= "BrickColor"
             end
 
             Properties.DisplayEnumDropdown = function(entryIndex)
@@ -4143,7 +4191,8 @@ return search]==]
                 local soundPreview = guiElems.SoundPreview
 
                 local propVal = Properties.GetPropVal(prop, propObj)
-                local inputFullName = inputProp and (inputProp.Class .. "." .. inputProp.Name .. (inputProp.SubName or ""))
+                local inputFullName = inputProp and
+                (inputProp.Class .. "." .. inputProp.Name .. (inputProp.SubName or ""))
 
                 local offset = 4
                 local endOffset = 6
@@ -4154,7 +4203,7 @@ return search]==]
                     enumArrow.Visible = false
                     if propVal then
                         gradient.Color = (typeName == "Color3" and ColorSequence.new(propVal)) or
-                        (typeName == "BrickColor" and ColorSequence.new(propVal.Color)) or propVal
+                            (typeName == "BrickColor" and ColorSequence.new(propVal.Color)) or propVal
                     else
                         gradient.Color = ColorSequence.new(Color3.new(1, 1, 1))
                     end
@@ -4298,7 +4347,7 @@ return search]==]
                             propNameLabel.Size = UDim2.new(1, -2 - (scaleType == 0 and 0 or 6), 1, 0)
 
                             local gName = (prop.CategoryName and "CAT_" .. prop.CategoryName) or
-                            prop.Class .. "." .. prop.Name .. (prop.SubName or "")
+                                prop.Class .. "." .. prop.Name .. (prop.SubName or "")
 
                             if prop.CategoryName then
                                 entry.BackgroundColor3 = Settings.Theme.Main1
@@ -4346,18 +4395,18 @@ return search]==]
                                 valueFrame.Visible = true
 
                                 expand.Visible = typeData.Category == "DataType" and Properties.ExpandableTypes
-                                [typeName] or Properties.ExpandableProps[gName]
+                                    [typeName] or Properties.ExpandableProps[gName]
                                 propNameBox.TextColor3 = tags.ReadOnly and Settings.Theme.PlaceholderText or
-                                Settings.Theme.Text
+                                    Settings.Theme.Text
 
                                 -- Display property value
                                 Properties.DisplayProp(prop, i)
                                 if propObj then
                                     if prop.IsAttribute then
                                         propCons[#propCons + 1] = getAttributeChangedSignal(propObj, prop.AttributeName)
-                                        :Connect(function()
-                                            Properties.DisplayProp(prop, i)
-                                        end)
+                                            :Connect(function()
+                                                Properties.DisplayProp(prop, i)
+                                            end)
                                     else
                                         propCons[#propCons + 1] = getPropChangedSignal(propObj, propName):Connect(function()
                                             Properties.DisplayProp(prop, i)
@@ -4368,7 +4417,7 @@ return search]==]
                                 -- Position and resize Input Box
                                 local beforeVisible = valueBox.Visible
                                 local inputFullName = inputProp and
-                                (inputProp.Class .. "." .. inputProp.Name .. (inputProp.SubName or ""))
+                                    (inputProp.Class .. "." .. inputProp.Name .. (inputProp.SubName or ""))
                                 if gName == inputFullName then
                                     nameFrame.BackgroundColor3 = Settings.Theme.ListSelection
                                     nameFrame.BackgroundTransparency = 0
@@ -4481,31 +4530,31 @@ return search]==]
                                 elseif rootTypeName == "UDim2" then
                                     local rootX, rootY = root.X, root.Y
                                     local X_UDim = (subName == ".X" and setVal) or
-                                    UDim.new((subName == ".X.Scale" and setVal) or rootX.Scale,
-                                        (subName == ".X.Offset" and setVal) or rootX.Offset)
+                                        UDim.new((subName == ".X.Scale" and setVal) or rootX.Scale,
+                                            (subName == ".X.Offset" and setVal) or rootX.Offset)
                                     local Y_UDim = (subName == ".Y" and setVal) or
-                                    UDim.new((subName == ".Y.Scale" and setVal) or rootY.Scale,
-                                        (subName == ".Y.Offset" and setVal) or rootY.Offset)
+                                        UDim.new((subName == ".Y.Scale" and setVal) or rootY.Scale,
+                                            (subName == ".Y.Offset" and setVal) or rootY.Offset)
                                     setVal = UDim2.new(X_UDim, Y_UDim)
                                 elseif rootTypeName == "CFrame" then
                                     local rootPos, rootRight, rootUp, rootLook = root.Position, root.RightVector,
                                         root.UpVector, root.LookVector
                                     local pos = (subName == ".Position" and setVal) or
-                                    Vector3.new((subName == ".Position.X" and setVal) or rootPos.X,
-                                        (subName == ".Position.Y" and setVal) or rootPos.Y,
-                                        (subName == ".Position.Z" and setVal) or rootPos.Z)
+                                        Vector3.new((subName == ".Position.X" and setVal) or rootPos.X,
+                                            (subName == ".Position.Y" and setVal) or rootPos.Y,
+                                            (subName == ".Position.Z" and setVal) or rootPos.Z)
                                     local rightV = (subName == ".RightVector" and setVal) or
-                                    Vector3.new((subName == ".RightVector.X" and setVal) or rootRight.X,
-                                        (subName == ".RightVector.Y" and setVal) or rootRight.Y,
-                                        (subName == ".RightVector.Z" and setVal) or rootRight.Z)
+                                        Vector3.new((subName == ".RightVector.X" and setVal) or rootRight.X,
+                                            (subName == ".RightVector.Y" and setVal) or rootRight.Y,
+                                            (subName == ".RightVector.Z" and setVal) or rootRight.Z)
                                     local upV = (subName == ".UpVector" and setVal) or
-                                    Vector3.new((subName == ".UpVector.X" and setVal) or rootUp.X,
-                                        (subName == ".UpVector.Y" and setVal) or rootUp.Y,
-                                        (subName == ".UpVector.Z" and setVal) or rootUp.Z)
+                                        Vector3.new((subName == ".UpVector.X" and setVal) or rootUp.X,
+                                            (subName == ".UpVector.Y" and setVal) or rootUp.Y,
+                                            (subName == ".UpVector.Z" and setVal) or rootUp.Z)
                                     local lookV = (subName == ".LookVector" and setVal) or
-                                    Vector3.new((subName == ".LookVector.X" and setVal) or rootLook.X,
-                                        (subName == ".RightVector.Y" and setVal) or rootLook.Y,
-                                        (subName == ".RightVector.Z" and setVal) or rootLook.Z)
+                                        Vector3.new((subName == ".LookVector.X" and setVal) or rootLook.X,
+                                            (subName == ".RightVector.Y" and setVal) or rootLook.Y,
+                                            (subName == ".RightVector.Z" and setVal) or rootLook.Z)
                                     setVal = CFrame.fromMatrix(pos, rightV, upV, -lookV)
                                 elseif rootTypeName == "Rect" then
                                     local rootMin, rootMax = root.Min, root.Max
@@ -4517,27 +4566,27 @@ return search]==]
                                 elseif rootTypeName == "PhysicalProperties" then
                                     local rootProps = PhysicalProperties.new(obj.Material)
                                     local density = (subName == ".Density" and setVal) or (root and root.Density) or
-                                    rootProps.Density
+                                        rootProps.Density
                                     local friction = (subName == ".Friction" and setVal) or (root and root.Friction) or
-                                    rootProps.Friction
+                                        rootProps.Friction
                                     local elasticity = (subName == ".Elasticity" and setVal) or
-                                    (root and root.Elasticity) or rootProps.Elasticity
+                                        (root and root.Elasticity) or rootProps.Elasticity
                                     local frictionWeight = (subName == ".FrictionWeight" and setVal) or
-                                    (root and root.FrictionWeight) or rootProps.FrictionWeight
+                                        (root and root.FrictionWeight) or rootProps.FrictionWeight
                                     local elasticityWeight = (subName == ".ElasticityWeight" and setVal) or
-                                    (root and root.ElasticityWeight) or rootProps.ElasticityWeight
+                                        (root and root.ElasticityWeight) or rootProps.ElasticityWeight
                                     setVal = PhysicalProperties.new(density, friction, elasticity, frictionWeight,
                                         elasticityWeight)
                                 elseif rootTypeName == "Ray" then
                                     local rootOrigin, rootDirection = root.Origin, root.Direction
                                     local origin = (subName == ".Origin" and setVal) or
-                                    Vector3.new((subName == ".Origin.X" and setVal) or rootOrigin.X,
-                                        (subName == ".Origin.Y" and setVal) or rootOrigin.Y,
-                                        (subName == ".Origin.Z" and setVal) or rootOrigin.Z)
+                                        Vector3.new((subName == ".Origin.X" and setVal) or rootOrigin.X,
+                                            (subName == ".Origin.Y" and setVal) or rootOrigin.Y,
+                                            (subName == ".Origin.Z" and setVal) or rootOrigin.Z)
                                     local direction = (subName == ".Direction" and setVal) or
-                                    Vector3.new((subName == ".Direction.X" and setVal) or rootDirection.X,
-                                        (subName == ".Direction.Y" and setVal) or rootDirection.Y,
-                                        (subName == ".Direction.Z" and setVal) or rootDirection.Z)
+                                        Vector3.new((subName == ".Direction.X" and setVal) or rootDirection.X,
+                                            (subName == ".Direction.Y" and setVal) or rootDirection.Y,
+                                            (subName == ".Direction.Z" and setVal) or rootDirection.Z)
                                     setVal = Ray.new(origin, direction)
                                 elseif rootTypeName == "Faces" then
                                     local faces = {}
@@ -4809,8 +4858,8 @@ return search]==]
 ]]
 
         -- Common Locals
-        local Main, Lib, Apps, Settings            -- Main Containers
-        local Explorer, Properties, ScriptViewer, Notebook -- Major Apps
+        local Main, Lib, Apps, Settings                         -- Main Containers
+        local Explorer, Properties, ScriptViewer, Notebook      -- Major Apps
         local API, RMD, env, service, plr, create, createSimple -- Main Locals
 
         local function initDeps(data)
@@ -4842,8 +4891,12 @@ return search]==]
 
             ScriptViewer.ViewScript = function(scr)
                 local success, source = pcall(env.decompile or function() end, scr)
-                if not success or not source then source, PreviousScr = "-- DEX - Source failed to decompile", nil else PreviousScr =
-                    scr end
+                if not success or not source then
+                    source, PreviousScr = "-- DEX - Source failed to decompile", nil
+                else
+                    PreviousScr =
+                        scr
+                end
                 codeFrame:SetText(source:gsub("\0", "\\0")) -- Fix stupid breaking script viewer
                 window:Show()
             end
@@ -4904,13 +4957,14 @@ return search]==]
                             local getconstants = (debug and debug.getconstants) or getconstants or getconsts
                             local getinfo = (debug and (debug.getinfo or debug.info)) or getinfo
                             local original = ("\n-- // Function Dumper made by King.Kevin\n-- // Script Path: %s\n\n--[[")
-                            :format(PreviousScr:GetFullName())
+                                :format(PreviousScr:GetFullName())
                             local dump = original
                             local functions, function_count, data_base = {}, 0, {}
                             function functions:add_to_dump(str, indentation, new_line)
                                 local new_line = new_line or true
                                 dump = dump ..
-                                ("%s%s%s"):format(string.rep("    ", indentation), tostring(str), new_line and "\n" or "")
+                                    ("%s%s%s"):format(string.rep("    ", indentation), tostring(str),
+                                        new_line and "\n" or "")
                             end
 
                             function functions:get_function_name(func)
@@ -4921,14 +4975,15 @@ return search]==]
                             function functions:dump_table(input, indent, index)
                                 local indent = indent < 0 and 0 or indent
                                 functions:add_to_dump(
-                                ("%s [%s] %s"):format(tostring(index), tostring(typeof(input)), tostring(input)),
+                                    ("%s [%s] %s"):format(tostring(index), tostring(typeof(input)), tostring(input)),
                                     indent - 1)
                                 local count = 0
                                 for index, value in pairs(input) do
                                     count = count + 1
                                     if type(value) == "function" then
                                         functions:add_to_dump(
-                                        ("%d [function] = %s"):format(count, functions:get_function_name(value)), indent)
+                                            ("%d [function] = %s"):format(count, functions:get_function_name(value)),
+                                            indent)
                                     elseif type(value) == "table" then
                                         if not data_base[value] then
                                             data_base[value] = true
@@ -4936,11 +4991,12 @@ return search]==]
                                             functions:dump_table(value, indent + 1, index)
                                         else
                                             functions:add_to_dump(
-                                            ("%d [table] (Recursive table detected)"):format(count), indent)
+                                                ("%d [table] (Recursive table detected)"):format(count), indent)
                                         end
                                     else
                                         functions:add_to_dump(
-                                        ("%d [%s] = %s"):format(count, tostring(typeof(value)), tostring(value)), indent)
+                                            ("%d [%s] = %s"):format(count, tostring(typeof(value)), tostring(value)),
+                                            indent)
                                     end
                                 end
                             end
@@ -4949,11 +5005,11 @@ return search]==]
                                 functions:add_to_dump(("\nFunction Dump: %s"):format(functions:get_function_name(input)),
                                     indent)
                                 functions:add_to_dump(
-                                ("\nFunction Upvalues: %s"):format(functions:get_function_name(input)), indent)
+                                    ("\nFunction Upvalues: %s"):format(functions:get_function_name(input)), indent)
                                 for index, upvalue in pairs(getupvalues(input)) do
                                     if type(upvalue) == "function" then
                                         functions:add_to_dump(
-                                        ("%d [function] = %s"):format(index, functions:get_function_name(upvalue)),
+                                            ("%d [function] = %s"):format(index, functions:get_function_name(upvalue)),
                                             indent + 1)
                                     elseif type(upvalue) == "table" then
                                         if not data_base[upvalue] then
@@ -4962,20 +5018,20 @@ return search]==]
                                             functions:dump_table(upvalue, indent + 2, index)
                                         else
                                             functions:add_to_dump(
-                                            ("%d [table] (Recursive table detected)"):format(index), indent + 1)
+                                                ("%d [table] (Recursive table detected)"):format(index), indent + 1)
                                         end
                                     else
                                         functions:add_to_dump(
-                                        ("%d [%s] = %s"):format(index, tostring(typeof(upvalue)), tostring(upvalue)),
+                                            ("%d [%s] = %s"):format(index, tostring(typeof(upvalue)), tostring(upvalue)),
                                             indent + 1)
                                     end
                                 end
                                 functions:add_to_dump(
-                                ("\nFunction Constants: %s"):format(functions:get_function_name(input)), indent)
+                                    ("\nFunction Constants: %s"):format(functions:get_function_name(input)), indent)
                                 for index, constant in pairs(getconstants(input)) do
                                     if type(constant) == "function" then
                                         functions:add_to_dump(
-                                        ("%d [function] = %s"):format(index, functions:get_function_name(constant)),
+                                            ("%d [function] = %s"):format(index, functions:get_function_name(constant)),
                                             indent + 1)
                                     elseif type(constant) == "table" then
                                         if not data_base[constant] then
@@ -4984,11 +5040,11 @@ return search]==]
                                             functions:dump_table(constant, indent + 2, index)
                                         else
                                             functions:add_to_dump(
-                                            ("%d [table] (Recursive table detected)"):format(index), indent + 1)
+                                                ("%d [table] (Recursive table detected)"):format(index), indent + 1)
                                         end
                                     else
                                         functions:add_to_dump(
-                                        ("%d [%s] = %s"):format(index, tostring(typeof(constant)), tostring(constant)),
+                                            ("%d [%s] = %s"):format(index, tostring(typeof(constant)), tostring(constant)),
                                             indent + 1)
                                     end
                                 end
@@ -5021,8 +5077,8 @@ return search]==]
 ]]
 
         -- Common Locals
-        local Main, Lib, Apps, Settings            -- Main Containers
-        local Explorer, Properties, ScriptViewer, Notebook -- Major Apps
+        local Main, Lib, Apps, Settings                         -- Main Containers
+        local Explorer, Properties, ScriptViewer, Notebook      -- Major Apps
         local API, RMD, env, service, plr, create, createSimple -- Main Locals
 
         local function initDeps(data)
@@ -5079,8 +5135,14 @@ return search]==]
             local function getGuiMT(props, funcs)
                 return {
                     __index = function(self, ind) if not props[ind] then return funcs[ind] or self.Gui[ind] end end,
-                    __newindex = function(self, ind, val) if not props[ind] then self.Gui[ind] = val else rawset(self,
-                                ind, val) end end
+                    __newindex = function(self, ind, val)
+                        if not props[ind] then
+                            self.Gui[ind] = val
+                        else
+                            rawset(self,
+                                ind, val)
+                        end
+                    end
                 }
             end
 
@@ -5111,17 +5173,17 @@ return search]==]
                 local guiSize = gui.AbsoluteSize
 
                 return mouse.X >= guiPosition.X and mouse.X < guiPosition.X + guiSize.X and mouse.Y >= guiPosition.Y and
-                mouse.Y < guiPosition.Y + guiSize.Y
+                    mouse.Y < guiPosition.Y + guiSize.Y
             end
 
             Lib.IsShiftDown = function()
                 return service.UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or
-                service.UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
+                    service.UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
             end
 
             Lib.IsCtrlDown = function()
                 return service.UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or
-                service.UserInputService:IsKeyDown(Enum.KeyCode.RightControl)
+                    service.UserInputService:IsKeyDown(Enum.KeyCode.RightControl)
             end
 
             Lib.CreateArrow = function(size, num, dir)
@@ -5358,7 +5420,7 @@ return search]==]
                             button.BackgroundTransparency = Lib.CheckMouseInGui(button) and 0.4 or 1
                         elseif mode == 2 then
                             button.BackgroundColor3 = Lib.CheckMouseInGui(button) and control.HoverColor or
-                            control.StartColor
+                                control.StartColor
                             if control.OutlineColor then button.BorderColor3 = control.OutlineColor end
                         end
                     end
@@ -5737,11 +5799,29 @@ return search]==]
 
                 local function createFrame(self)
                     local newFrame = createSimple("Frame",
-                        { Style = 0, Active = true, AnchorPoint = Vector2.new(0, 0), BackgroundColor3 = Color3.new(
-                        0.35294118523598, 0.35294118523598, 0.35294118523598), BackgroundTransparency = 0, BorderColor3 =
-                        Color3.new(0.10588236153126, 0.16470588743687, 0.20784315466881), BorderSizePixel = 0, ClipsDescendants = false, Draggable = false, Position =
-                        UDim2.new(1, -16, 0, 0), Rotation = 0, Selectable = false, Size = UDim2.new(0, 16, 1, 0), SizeConstraint = 0, Visible = true, ZIndex = 1, Name =
-                        "ScrollBar", })
+                        {
+                            Style = 0,
+                            Active = true,
+                            AnchorPoint = Vector2.new(0, 0),
+                            BackgroundColor3 = Color3.new(
+                                0.35294118523598, 0.35294118523598, 0.35294118523598),
+                            BackgroundTransparency = 0,
+                            BorderColor3 =
+                                Color3.new(0.10588236153126, 0.16470588743687, 0.20784315466881),
+                            BorderSizePixel = 0,
+                            ClipsDescendants = false,
+                            Draggable = false,
+                            Position =
+                                UDim2.new(1, -16, 0, 0),
+                            Rotation = 0,
+                            Selectable = false,
+                            Size = UDim2.new(0, 16, 1, 0),
+                            SizeConstraint = 0,
+                            Visible = true,
+                            ZIndex = 1,
+                            Name =
+                            "ScrollBar",
+                        })
                     local button1 = nil
                     local button2 = nil
 
@@ -5899,7 +5979,9 @@ return search]==]
                             if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
                             releaseEvent:Disconnect()
                             if mouseEvent then mouseEvent:Disconnect() end
-                            if checkMouseInGui(scrollThumb) then scrollThumb.BackgroundTransparency = 0.2 else
+                            if checkMouseInGui(scrollThumb) then
+                                scrollThumb.BackgroundTransparency = 0.2
+                            else
                                 scrollThumb.BackgroundTransparency = 0
                                 scrollThumb.BackgroundColor3 = self.ThumbColor
                             end
@@ -5910,7 +5992,7 @@ return search]==]
                         mouseEvent = user.InputChanged:Connect(function(input)
                             if input.UserInputType == Enum.UserInputType.MouseMovement and thumbPress and releaseEvent.Connected then
                                 local thumbFrameSize = scrollThumbFrame.AbsoluteSize[dir] - scrollThumb.AbsoluteSize
-                                [dir]
+                                    [dir]
                                 local pos = mouse[dir] - scrollThumbFrame.AbsolutePosition[dir] - mouseOffset
                                 if pos > thumbFrameSize then
                                     pos = thumbFrameSize
@@ -5920,7 +6002,7 @@ return search]==]
                                 if lastThumbPos ~= pos then
                                     lastThumbPos = pos
                                     self:ScrollTo(math.floor(0.5 + pos / thumbFrameSize *
-                                    (self.TotalSpace - self.VisibleSpace)))
+                                        (self.TotalSpace - self.VisibleSpace)))
                                 end
                                 wait()
                             end
@@ -6034,7 +6116,7 @@ return search]==]
                                 BackgroundColor3 = v,
                                 BorderSizePixel = 0,
                                 Position = self.Horizontal and UDim2.new(i / self.TotalSpace, 0, 1, -6) or
-                                UDim2.new(1, -6, i / self.TotalSpace, 0),
+                                    UDim2.new(1, -6, i / self.TotalSpace, 0),
                                 Size = self.Horizontal and UDim2.new(0, 1, 0, 6) or UDim2.new(0, 6, 0, 1),
                                 Name = "Marker" .. tostring(i),
                                 Parent = markerFrame
@@ -6099,10 +6181,14 @@ return search]==]
                         self.ScrollDownEvent:Disconnect()
                         self.ScrollDownEvent = nil
                     end
-                    self.ScrollUpEvent = frame.MouseWheelForward:Connect(function() self:ScrollTo(self.Index -
-                        self.WheelIncrement) end)
-                    self.ScrollDownEvent = frame.MouseWheelBackward:Connect(function() self:ScrollTo(self.Index +
-                        self.WheelIncrement) end)
+                    self.ScrollUpEvent = frame.MouseWheelForward:Connect(function()
+                        self:ScrollTo(self.Index -
+                            self.WheelIncrement)
+                    end)
+                    self.ScrollDownEvent = frame.MouseWheelBackward:Connect(function()
+                        self:ScrollTo(self.Index +
+                            self.WheelIncrement)
+                    end)
                 end
 
                 local mt = {}
@@ -6200,15 +6286,21 @@ return search]==]
                                         local deltaX = input.Position.X - resizer.AbsolutePosition.X - offX
                                         local deltaY = input.Position.Y - resizer.AbsolutePosition.Y - offY
 
-                                        if guiMain.AbsoluteSize.X + deltaX * signX < self.MinX then deltaX = signX *
-                                            (self.MinX - guiMain.AbsoluteSize.X) end
-                                        if guiMain.AbsoluteSize.Y + deltaY * signY < self.MinY then deltaY = signY *
-                                            (self.MinY - guiMain.AbsoluteSize.Y) end
-                                        if signY < 0 and guiMain.AbsolutePosition.Y + deltaY < 0 then deltaY = -guiMain
-                                            .AbsolutePosition.Y end
+                                        if guiMain.AbsoluteSize.X + deltaX * signX < self.MinX then
+                                            deltaX = signX *
+                                                (self.MinX - guiMain.AbsoluteSize.X)
+                                        end
+                                        if guiMain.AbsoluteSize.Y + deltaY * signY < self.MinY then
+                                            deltaY = signY *
+                                                (self.MinY - guiMain.AbsoluteSize.Y)
+                                        end
+                                        if signY < 0 and guiMain.AbsolutePosition.Y + deltaY < 0 then
+                                            deltaY = -guiMain
+                                                .AbsolutePosition.Y
+                                        end
 
                                         guiMain.Position = guiMain.Position +
-                                        UDim2.new(0, (signX < 0 and deltaX or 0), 0, (signY < 0 and deltaY or 0))
+                                            UDim2.new(0, (signX < 0 and deltaX or 0), 0, (signY < 0 and deltaY or 0))
                                         self.SizeX = self.SizeX + (isH and deltaX * signX or 0)
                                         self.SizeY = self.SizeY + (isV and deltaY * signY or 0)
                                         guiMain.Size = UDim2.new(0, self.SizeX, 0, self.Minimized and 20 or self.SizeY)
@@ -6336,68 +6428,69 @@ return search]==]
                             guiDragging = true
 
                             releaseEvent = cloneref(game["Run Service"].Parent:GetService("UserInputService"))
-                            .InputEnded:Connect(function(input)
-                                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                                    releaseEvent:Disconnect()
-                                    mouseEvent:Disconnect()
-                                    guiDragging = false
-                                    alignIndicator.Parent = nil
-                                    if alignInsertSide then
-                                        local targetSide = (alignInsertSide == "left" and leftSide) or
-                                        (alignInsertSide == "right" and rightSide)
-                                        self:AlignTo(targetSide, alignInsertPos)
+                                .InputEnded:Connect(function(input)
+                                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                                        releaseEvent:Disconnect()
+                                        mouseEvent:Disconnect()
+                                        guiDragging = false
+                                        alignIndicator.Parent = nil
+                                        if alignInsertSide then
+                                            local targetSide = (alignInsertSide == "left" and leftSide) or
+                                                (alignInsertSide == "right" and rightSide)
+                                            self:AlignTo(targetSide, alignInsertPos)
+                                        end
                                     end
-                                end
-                            end)
+                                end)
 
                             mouseEvent = cloneref(game["Run Service"].Parent:GetService("UserInputService"))
-                            .InputChanged:Connect(function(input)
-                                if input.UserInputType == Enum.UserInputType.MouseMovement and self.Draggable and not self.Closed then
-                                    if self.Aligned then
-                                        if leftSide.Resizing or rightSide.Resizing then return end
-                                        local posX, posY = input.Position.X - offX, input.Position.Y - offY
-                                        local delta = math.sqrt((posX - initX) ^ 2 + (posY - initY) ^ 2)
-                                        if delta >= 5 then
-                                            self:SetAligned(false)
-                                        end
-                                    else
-                                        local inputX, inputY = input.Position.X, input.Position.Y
-                                        local posX, posY = inputX - offX, inputY - offY
-                                        if posY < 0 then posY = 0 end
-                                        guiMain.Position = UDim2.new(0, posX, 0, posY)
+                                .InputChanged:Connect(function(input)
+                                    if input.UserInputType == Enum.UserInputType.MouseMovement and self.Draggable and not self.Closed then
+                                        if self.Aligned then
+                                            if leftSide.Resizing or rightSide.Resizing then return end
+                                            local posX, posY = input.Position.X - offX, input.Position.Y - offY
+                                            local delta = math.sqrt((posX - initX) ^ 2 + (posY - initY) ^ 2)
+                                            if delta >= 5 then
+                                                self:SetAligned(false)
+                                            end
+                                        else
+                                            local inputX, inputY = input.Position.X, input.Position.Y
+                                            local posX, posY = inputX - offX, inputY - offY
+                                            if posY < 0 then posY = 0 end
+                                            guiMain.Position = UDim2.new(0, posX, 0, posY)
 
-                                        if self.Resizable and self.Alignable then
-                                            if inputX < 25 then
-                                                if sideHasRoom(leftSide, self.MinY or 100) then
-                                                    local insertPos, range = getSideInsertPos(leftSide, inputY)
-                                                    alignIndicator.Indicator.Position = UDim2.new(0, -15, 0, range[1])
-                                                    alignIndicator.Indicator.Size = UDim2.new(0, 40, 0, range[2] -
-                                                    range[1])
-                                                    Lib.ShowGui(alignIndicator)
-                                                    alignInsertPos = insertPos
-                                                    alignInsertSide = "left"
-                                                    return
-                                                end
-                                            elseif inputX >= maxX - 25 then
-                                                if sideHasRoom(rightSide, self.MinY or 100) then
-                                                    local insertPos, range = getSideInsertPos(rightSide, inputY)
-                                                    alignIndicator.Indicator.Position = UDim2.new(0, maxX - 25, 0,
-                                                        range[1])
-                                                    alignIndicator.Indicator.Size = UDim2.new(0, 40, 0, range[2] -
-                                                    range[1])
-                                                    Lib.ShowGui(alignIndicator)
-                                                    alignInsertPos = insertPos
-                                                    alignInsertSide = "right"
-                                                    return
+                                            if self.Resizable and self.Alignable then
+                                                if inputX < 25 then
+                                                    if sideHasRoom(leftSide, self.MinY or 100) then
+                                                        local insertPos, range = getSideInsertPos(leftSide, inputY)
+                                                        alignIndicator.Indicator.Position = UDim2.new(0, -15, 0, range
+                                                        [1])
+                                                        alignIndicator.Indicator.Size = UDim2.new(0, 40, 0, range[2] -
+                                                            range[1])
+                                                        Lib.ShowGui(alignIndicator)
+                                                        alignInsertPos = insertPos
+                                                        alignInsertSide = "left"
+                                                        return
+                                                    end
+                                                elseif inputX >= maxX - 25 then
+                                                    if sideHasRoom(rightSide, self.MinY or 100) then
+                                                        local insertPos, range = getSideInsertPos(rightSide, inputY)
+                                                        alignIndicator.Indicator.Position = UDim2.new(0, maxX - 25, 0,
+                                                            range[1])
+                                                        alignIndicator.Indicator.Size = UDim2.new(0, 40, 0, range[2] -
+                                                            range[1])
+                                                        Lib.ShowGui(alignIndicator)
+                                                        alignInsertPos = insertPos
+                                                        alignInsertSide = "right"
+                                                        return
+                                                    end
                                                 end
                                             end
+                                            alignIndicator.Parent = nil
+                                            alignInsertPos = nil
+                                            alignInsertSide = nil
                                         end
-                                        alignIndicator.Parent = nil
-                                        alignInsertPos = nil
-                                        alignInsertSide = nil
                                     end
-                                end
-                            end)
+                                end)
                         end
                     end)
 
@@ -6581,7 +6674,7 @@ return search]==]
                                                     window.SizeY = newSize
                                                 end
                                                 windows[pos + 1].SizeY = windows[pos + 1].SizeY +
-                                                math.max(0, -delta - neededSize)
+                                                    math.max(0, -delta - neededSize)
                                             end
 
                                             updateSideFrames()
@@ -6658,10 +6751,10 @@ return search]==]
                                     v.GuiElems.Main.Position.Y.Offset + v.GuiElems.Main.Size.Y.Offset)
                             end)
                             side.ResizeCons[#side.ResizeCons + 1] = v.Gui.Main:GetPropertyChangedSignal("Position")
-                            :Connect(function()
-                                newTemplate.Position = UDim2.new(1, -side.Width, 0,
-                                    v.GuiElems.Main.Position.Y.Offset + v.GuiElems.Main.Size.Y.Offset)
-                            end)
+                                :Connect(function()
+                                    newTemplate.Position = UDim2.new(1, -side.Width, 0,
+                                        v.GuiElems.Main.Position.Y.Offset + v.GuiElems.Main.Size.Y.Offset)
+                                end)
                             sideResizerHook(newTemplate, "V", side, i)
                             newTemplate.Parent = side.Frame
                         end
@@ -6750,7 +6843,7 @@ return search]==]
                                 Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.25, true)
                         end
                         self.GuiElems.Minimize.ImageLabel.Image = newVal and "rbxassetid://5060023708" or
-                        "rbxassetid://5034768003"
+                            "rbxassetid://5034768003"
                     end
 
                     if oldVal ~= newVal then
@@ -6790,24 +6883,30 @@ return search]==]
                     self.GuiElems.Main.Active = not val
                     self.GuiElems.Main.Outlines.Visible = not val
                     if not val then
-                        for i, v in pairs(leftSide.Windows) do if v == self then
+                        for i, v in pairs(leftSide.Windows) do
+                            if v == self then
                                 table.remove(leftSide.Windows, i)
                                 break
-                            end end
-                        for i, v in pairs(rightSide.Windows) do if v == self then
+                            end
+                        end
+                        for i, v in pairs(rightSide.Windows) do
+                            if v == self then
                                 table.remove(rightSide.Windows, i)
                                 break
-                            end end
+                            end
+                        end
                         if not table.find(visibleWindows, self) then table.insert(visibleWindows, 1, self) end
                         self.GuiElems.Minimize.ImageLabel.Image = "rbxassetid://5034768003"
                         self.Side = nil
                         updateWindows()
                     else
                         self:SetMinimized(false, 3)
-                        for i, v in pairs(visibleWindows) do if v == self then
+                        for i, v in pairs(visibleWindows) do
+                            if v == self then
                                 table.remove(visibleWindows, i)
                                 break
-                            end end
+                            end
+                        end
                         self.GuiElems.Minimize.ImageLabel.Image = "rbxassetid://5448127505"
                     end
                 end
@@ -6980,7 +7079,8 @@ return search]==]
                             window.GuiElems.Main.Size = UDim2.new(0, window.SizeX, 0, 20)
                             local ti = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                             window:StopTweens()
-                            window:DoTween(window.GuiElems.Main, ti, { Size = UDim2.new(0, window.SizeX, 0, window.SizeY) })
+                            window:DoTween(window.GuiElems.Main, ti,
+                                { Size = UDim2.new(0, window.SizeX, 0, window.SizeY) })
 
                             window.SizeY = size or window.SizeY
                             table.insert(visibleWindows, 1, window)
@@ -7259,7 +7359,8 @@ return search]==]
                 funcs.AddDivider = function(self, text)
                     self.QueuedDivider = false
                     local textWidth = text and
-                    service.TextService:GetTextSize(text, 14, Enum.Font.SourceSans, Vector2.new(999999999, 20)).X or nil
+                        service.TextService:GetTextSize(text, 14, Enum.Font.SourceSans, Vector2.new(999999999, 20)).X or
+                        nil
                     table.insert(self.Items, { Divider = true, Text = text, TextSize = textWidth and textWidth + 4 })
                     self.Updated = nil
                 end
@@ -7762,12 +7863,12 @@ return search]==]
                             end)
 
                             scrollEvent = cloneref(game["Run Service"].Parent:GetService("RunService")).RenderStepped
-                            :Connect(function()
-                                if scrollPowerV ~= 0 or scrollPowerH ~= 0 then
-                                    obj:ScrollDelta(scrollPowerH, scrollPowerV)
-                                    updateSelection()
-                                end
-                            end)
+                                :Connect(function()
+                                    if scrollPowerV ~= 0 or scrollPowerH ~= 0 then
+                                        obj:ScrollDelta(scrollPowerH, scrollPowerV)
+                                        updateSelection()
+                                    end
+                                end)
 
                             obj:Refresh()
                         end
@@ -7920,7 +8021,7 @@ return search]==]
                             setupMove(keycodes.Left, function()
                                 local line = self.Lines[self.CursorY + 1] or ""
                                 self.CursorX = self.CursorX - 1 -
-                                (line:sub(self.CursorX - 3, self.CursorX) == tabReplacement and 3 or 0)
+                                    (line:sub(self.CursorX - 3, self.CursorX) == tabReplacement and 3 or 0)
                                 if self.CursorX < 0 then
                                     self.CursorY = self.CursorY - 1
                                     local line2 = self.Lines[self.CursorY + 1] or ""
@@ -7934,7 +8035,7 @@ return search]==]
                             setupMove(keycodes.Right, function()
                                 local line = self.Lines[self.CursorY + 1] or ""
                                 self.CursorX = self.CursorX + 1 +
-                                (line:sub(self.CursorX + 1, self.CursorX + 4) == tabReplacement and 3 or 0)
+                                    (line:sub(self.CursorX + 1, self.CursorX + 4) == tabReplacement and 3 or 0)
                                 if self.CursorX > #line then
                                     self.CursorY = self.CursorY + 1
                                     self.CursorX = 0
@@ -7956,7 +8057,7 @@ return search]==]
                                 if not startRange then
                                     local line = self.Lines[self.CursorY + 1] or ""
                                     self.CursorX = self.CursorX - 1 -
-                                    (line:sub(self.CursorX - 3, self.CursorX) == tabReplacement and 3 or 0)
+                                        (line:sub(self.CursorX - 3, self.CursorX) == tabReplacement and 3 or 0)
                                     if self.CursorX < 0 then
                                         self.CursorY = self.CursorY - 1
                                         local line2 = self.Lines[self.CursorY + 1] or ""
@@ -7985,7 +8086,7 @@ return search]==]
                                 if not endRange then
                                     local line = self.Lines[self.CursorY + 1] or ""
                                     local endCursorX = self.CursorX + 1 +
-                                    (line:sub(self.CursorX + 1, self.CursorX + 4) == tabReplacement and 3 or 0)
+                                        (line:sub(self.CursorX + 1, self.CursorX + 4) == tabReplacement and 3 or 0)
                                     local endCursorY = self.CursorY
                                     if endCursorX > #line then
                                         endCursorY = endCursorY + 1
@@ -8111,7 +8212,7 @@ return search]==]
                         local middle = line:sub(x, x)
                         local right = line:sub(x + 1, x + 1)
                         local selRange = (#left > 0 and left or " ") ..
-                        (#middle > 0 and middle or " ") .. (#right > 0 and right or " ")
+                            (#middle > 0 and middle or " ") .. (#right > 0 and right or " ")
 
                         for i, v in pairs(tabJumps) do
                             if selRange:find(i) then
@@ -8214,7 +8315,7 @@ return search]==]
                     self.CursorY = cursorY
 
                     local cursorVisible = (cursorX >= viewX) and (cursorY >= viewY) and (cursorX <= viewX + maxCols) and
-                    (cursorY <= viewY + maxLines)
+                        (cursorY <= viewY + maxLines)
                     if cursorVisible then
                         local offX = (cursorX - viewX)
                         local offY = (cursorY - viewY)
@@ -8407,7 +8508,7 @@ return search]==]
                                     if wordBeginsDotted then
                                         local prevBuiltIn = lastWord and builtIns[lastWord]
                                         wordType = (prevBuiltIn and type(prevBuiltIn) == "table" and prevBuiltIn[word] and 8) or
-                                        10
+                                            10
                                     end
 
                                     if wordType ~= 8 then
@@ -8567,8 +8668,8 @@ return search]==]
 
                         -- Selection Text Color for first char
                         local inSelection = selRelaY >= selRow and selRelaY <= sel2Row and
-                        (selRelaY == selRow and viewX >= selColumn or selRelaY ~= selRow) and
-                        (selRelaY == sel2Row and viewX < sel2Column or selRelaY ~= sel2Row)
+                            (selRelaY == selRow and viewX >= selColumn or selRelaY ~= selRow) and
+                            (selRelaY == sel2Row and viewX < sel2Column or selRelaY ~= sel2Row)
                         if inSelection then
                             curType = -999
                             curTemplate = selectionTemplate
@@ -8581,20 +8682,20 @@ return search]==]
 
                             -- Selection Text Color
                             local inSelection = selRelaY >= selRow and selRelaY <= sel2Row and
-                            (selRelaY == selRow and selRelaX >= selColumn or selRelaY ~= selRow) and
-                            (selRelaY == sel2Row and selRelaX < sel2Column or selRelaY ~= sel2Row)
+                                (selRelaY == selRow and selRelaX >= selColumn or selRelaY ~= selRow) and
+                                (selRelaY == sel2Row and selRelaX < sel2Column or selRelaY ~= sel2Row)
                             if inSelection then
                                 posType = -999
                             end
 
                             if posType ~= curType then
                                 local template = (inSelection and selectionTemplate) or richTemplates[typeMap[posType]] or
-                                textTemplate
+                                    textTemplate
 
                                 if template ~= curTemplate then
                                     local nextText = gsub(sub(lineText, colStart, relaX - 1), "['\"<>&]", richReplace)
                                     resText = resText ..
-                                    (curTemplate ~= textTemplate and (curTemplate .. nextText .. "</font>") or nextText)
+                                        (curTemplate ~= textTemplate and (curTemplate .. nextText .. "</font>") or nextText)
                                     colStart = relaX
                                     curTemplate = template
                                 end
@@ -8606,12 +8707,12 @@ return search]==]
                         --warn("SUB",colStart,viewX+maxCols-1)
                         if #lastText > 0 then
                             resText = resText ..
-                            (curTemplate ~= textTemplate and (curTemplate .. lastText .. "</font>") or lastText)
+                                (curTemplate ~= textTemplate and (curTemplate .. lastText .. "</font>") or lastText)
                         end
 
                         if self.Lines[relaY] then
                             lineNumberStr = lineNumberStr ..
-                            (relaY == self.CursorY and ("<b>" .. relaY .. "</b>\n") or relaY .. "\n")
+                                (relaY == self.CursorY and ("<b>" .. relaY .. "</b>\n") or relaY .. "\n")
                         end
 
                         lineFrame.Label.Text = resText
@@ -8705,7 +8806,7 @@ return search]==]
                     end
                 end
 
-                funcs.GetText = function(self) -- TODO: better (use new tab format)
+                funcs.GetText = function(self)             -- TODO: better (use new tab format)
                     local source = table.concat(self.Lines, "\n")
                     return self:ConvertText(source, false) -- Tab Convert
                 end
@@ -8946,7 +9047,7 @@ return search]==]
                     if self.Style == 0 then
                         local color_base = self.Disabled and self.Colors.Disabled
                         guiElems.Outline.BackgroundColor3 = color_base or (self.Toggled and self.Colors.Primary) or
-                        self.Colors.Secondary
+                            self.Colors.Secondary
                         local walls_color = color_base or self.Colors.Primary
                         guiElems.Top.BackgroundColor3 = walls_color
                         guiElems.Bottom.BackgroundColor3 = walls_color
@@ -8954,11 +9055,11 @@ return search]==]
                         guiElems.Right.BackgroundColor3 = walls_color
                     else
                         guiElems.Outline.BackgroundColor3 = self.Disabled and self.Colors.Disabled or
-                        self.Colors.Secondary
+                            self.Colors.Secondary
                         guiElems.Filler.BackgroundColor3 = self.Disabled and self.Colors.DisabledBackground or
-                        self.Colors.Background
+                            self.Colors.Background
                         guiElems.Checkmark2.ImageColor3 = self.Disabled and self.Colors.DisabledCheck or
-                        self.Colors.Primary
+                            self.Colors.Primary
                     end
                 end
 
@@ -9379,22 +9480,22 @@ return search]==]
                         0.33333334326744, 0), Color3.new(0.66666668653488, 0.33333334326744, 0), Color3.new(0,
                         0.66666668653488, 0), Color3.new(0.66666668653488, 0.66666668653488, 0), Color3.new(0, 1, 0),
                         Color3.new(0.66666668653488, 1, 0), Color3.new(0, 0, 0.49803924560547), Color3.new(
-                    0.66666668653488, 0, 0.49803924560547), Color3.new(0, 0.33333334326744, 0.49803924560547), Color3
+                        0.66666668653488, 0, 0.49803924560547), Color3.new(0, 0.33333334326744, 0.49803924560547), Color3
                         .new(0.66666668653488, 0.33333334326744, 0.49803924560547), Color3.new(0, 0.66666668653488,
                         0.49803924560547), Color3.new(0.66666668653488, 0.66666668653488, 0.49803924560547), Color3.new(
-                    0, 1, 0.49803924560547), Color3.new(0.66666668653488, 1, 0.49803924560547), Color3.new(0, 0, 1),
+                        0, 1, 0.49803924560547), Color3.new(0.66666668653488, 1, 0.49803924560547), Color3.new(0, 0, 1),
                         Color3.new(0.66666668653488, 0, 1), Color3.new(0, 0.33333334326744, 1), Color3.new(
-                    0.66666668653488, 0.33333334326744, 1), Color3.new(0, 0.66666668653488, 1), Color3.new(
-                    0.66666668653488, 0.66666668653488, 1), Color3.new(0, 1, 1), Color3.new(0.66666668653488, 1, 1),
+                        0.66666668653488, 0.33333334326744, 1), Color3.new(0, 0.66666668653488, 1), Color3.new(
+                        0.66666668653488, 0.66666668653488, 1), Color3.new(0, 1, 1), Color3.new(0.66666668653488, 1, 1),
                         Color3.new(0.33333334326744, 0, 0), Color3.new(1, 0, 0), Color3.new(0.33333334326744,
                         0.33333334326744, 0), Color3.new(1, 0.33333334326744, 0), Color3.new(0.33333334326744,
                         0.66666668653488, 0), Color3.new(1, 0.66666668653488, 0), Color3.new(0.33333334326744, 1, 0),
                         Color3.new(1, 1, 0), Color3.new(0.33333334326744, 0, 0.49803924560547), Color3.new(1, 0,
                         0.49803924560547), Color3.new(0.33333334326744, 0.33333334326744, 0.49803924560547), Color3.new(
-                    1, 0.33333334326744, 0.49803924560547), Color3.new(0.33333334326744, 0.66666668653488,
+                        1, 0.33333334326744, 0.49803924560547), Color3.new(0.33333334326744, 0.66666668653488,
                         0.49803924560547), Color3.new(1, 0.66666668653488, 0.49803924560547), Color3.new(
-                    0.33333334326744, 1, 0.49803924560547), Color3.new(1, 1, 0.49803924560547), Color3.new(
-                    0.33333334326744, 0, 1), Color3.new(1, 0, 1), Color3.new(0.33333334326744, 0.33333334326744, 1),
+                        0.33333334326744, 1, 0.49803924560547), Color3.new(1, 1, 0.49803924560547), Color3.new(
+                        0.33333334326744, 0, 1), Color3.new(1, 0, 1), Color3.new(0.33333334326744, 0.33333334326744, 1),
                         Color3.new(1, 0.33333334326744, 1), Color3.new(0.33333334326744, 0.66666668653488, 1), Color3
                         .new(1, 0.66666668653488, 1), Color3.new(0.33333334326744, 1, 1), Color3.new(1, 1, 1) }
                     local customColors = {}
@@ -9946,8 +10047,9 @@ return search]==]
 
                         mouseEvent = user.InputChanged:Connect(function(input)
                             if input.UserInputType == Enum.UserInputType.MouseMovement then
-                                local bottomDiff = (mouse.Y + (20 - mouseDelta)) - (currentPoint[4].AbsolutePosition.Y + 2) -
-                                19
+                                local bottomDiff = (mouse.Y + (20 - mouseDelta)) -
+                                    (currentPoint[4].AbsolutePosition.Y + 2) -
+                                    19
                                 local newEnvelope = 10 * (math.max(bottomDiff, 0) / maxSize)
                                 local maxEnvelope = math.min(currentPoint[1], 10 - currentPoint[1])
                                 currentPoint[3] = math.min(newEnvelope, maxEnvelope)
@@ -10075,7 +10177,7 @@ return search]==]
                                 currentRise = currentRise - riseNow + math.abs(slope)
 
                                 local envPercent = (lineCount - fromPoint[4].Position.X.Offset) /
-                                (toPoint[4].Position.X.Offset - fromPoint[4].Position.X.Offset)
+                                    (toPoint[4].Position.X.Offset - fromPoint[4].Position.X.Offset)
                                 local envLerp = fromEnvelope + (nextEnvelope - fromEnvelope) * envPercent
                                 local relativeSize = (envLerp / 10) * numberLineSize.Y
 
@@ -10430,7 +10532,7 @@ return search]==]
                                 end
                             end
                             local lerpColor = fromColor[1]:lerp(toColor[1], (raw - fromColor[2]) /
-                            (toColor[2] - fromColor[2]))
+                                (toColor[2] - fromColor[2]))
                             local newPoint = { lerpColor, raw }
                             newPoint[3] = placeArrow(newPoint[2], newPoint)
                             table.insert(colors, newPoint)
@@ -10743,8 +10845,14 @@ return search]==]
                     local obj = initObj(props, mt)
                     obj.Gui = b
                     obj.Anim = Lib.ButtonAnim(b,
-                        { Mode = 2, StartColor = Settings.Theme.Button, HoverColor = Settings.Theme.ButtonHover, PressColor =
-                        Settings.Theme.ButtonPress, OutlineColor = Settings.Theme.Outline2 })
+                        {
+                            Mode = 2,
+                            StartColor = Settings.Theme.Button,
+                            HoverColor = Settings.Theme.ButtonHover,
+                            PressColor =
+                                Settings.Theme.ButtonPress,
+                            OutlineColor = Settings.Theme.Outline2
+                        })
 
                     b.MouseButton1Click:Connect(function() obj:Trigger("Click", 1) end)
                     b.MouseButton1Down:Connect(function() obj:Trigger("Down", 1) end)
@@ -10815,11 +10923,14 @@ return search]==]
                     end
 
                     if self.CanBeEmpty then
-                        context:Add({ Name = "- Select -", OnClick = function()
-                            self.Selected = nil
-                            self.OnSelect:Fire(nil)
-                            self:Update()
-                        end })
+                        context:Add({
+                            Name = "- Select -",
+                            OnClick = function()
+                                self.Selected = nil
+                                self.OnSelect:Fire(nil)
+                                self:Update()
+                            end
+                        })
                     end
 
                     for i = 1, #options do
@@ -11216,7 +11327,7 @@ Main = (function()
         -- other
         --env.setfflag = setfflag
         env.request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or
-        request
+            request
         env.decompile = decompile or (env.getscriptbytecode and env.request and env.base64encode and function(scr)
             local s, bytecode = pcall(env.getscriptbytecode, scr)
             if not s then
@@ -11448,8 +11559,8 @@ Main = (function()
                 end
             end
             rawXML = rawXML or
-            game:HttpGet(
-            "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml")
+                game:HttpGet(
+                    "https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml")
         else
             if script:FindFirstChild("RMD") then
                 rawXML = require(script.RMD)
@@ -11892,14 +12003,31 @@ Main = (function()
         end)
 
         -- Create Main Apps
-        Main.CreateApp({ Name = "Explorer", IconMap = Main.LargeIcons, Icon = "Explorer", Open = true, Window = Explorer
-        .Window })
+        Main.CreateApp({
+            Name = "Explorer",
+            IconMap = Main.LargeIcons,
+            Icon = "Explorer",
+            Open = true,
+            Window = Explorer
+                .Window
+        })
 
-        Main.CreateApp({ Name = "Properties", IconMap = Main.LargeIcons, Icon = "Properties", Open = true, Window =
-        Properties.Window })
+        Main.CreateApp({
+            Name = "Properties",
+            IconMap = Main.LargeIcons,
+            Icon = "Properties",
+            Open = true,
+            Window =
+                Properties.Window
+        })
 
-        Main.CreateApp({ Name = "Script Viewer", IconMap = Main.LargeIcons, Icon = "Script_Viewer", Window = ScriptViewer
-        .Window })
+        Main.CreateApp({
+            Name = "Script Viewer",
+            IconMap = Main.LargeIcons,
+            Icon = "Script_Viewer",
+            Window = ScriptViewer
+                .Window
+        })
 
         local cptsOnMouseClick = nil
         Main.CreateApp({
@@ -11945,8 +12073,10 @@ Main = (function()
     end
 
     Main.Init = function()
-        Main.Elevated = pcall(function() local a = cloneref(game["Run Service"].Parent:GetService("CoreGui"))
-            :GetFullName() end)
+        Main.Elevated = pcall(function()
+            local a = cloneref(game["Run Service"].Parent:GetService("CoreGui"))
+                :GetFullName()
+        end)
         Main.InitEnv()
         Main.LoadSettings()
         Main.SetupFilesystem()
